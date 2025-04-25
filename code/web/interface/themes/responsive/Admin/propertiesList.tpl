@@ -1,3 +1,9 @@
+{if isset($propertiesListWarningMessage) && !empty($propertiesListWarningMessage)}
+	<div class="alert alert-warning" role="alert">
+		{$propertiesListWarningMessage nofilter} {* Use nofilter as the message contains HTML. *}
+	</div>
+{/if}
+
 <div class="row">
 	<div class="col-xs-12 col-md-9">
 		<h1 id="pageTitle">{$pageTitleShort}</h1>

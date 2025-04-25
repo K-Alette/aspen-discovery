@@ -262,6 +262,19 @@ class IndexingProfile extends DataObject {
 		$formatMapStructure = FormatMapValue::getObjectStructure('editIndexingProfile');
 		unset($formatMapStructure['indexingProfileId']);
 
+		$accountProfiles = [];
+		require_once ROOT_DIR . '/sys/Account/AccountProfile.php';
+		$accountProfile = new AccountProfile();
+		$accountProfile->orderBy('name');
+		$accountProfile->find();
+		while ($accountProfile->fetch()) {
+			// The 'admin' and 'admin_sso' account profiles do not use the recordSource, so check them by 'name'.
+			if ($accountProfile->name != "admin" && $accountProfile->name != "admin_sso" && !empty($accountProfile->recordSource)) {
+				$accountProfiles[$accountProfile->recordSource] = $accountProfile->recordSource;
+			}
+		}
+		unset($accountProfile);
+
 		$structure = [
 			'id' => [
 				'property' => 'id',
@@ -272,11 +285,10 @@ class IndexingProfile extends DataObject {
 
 			'name' => [
 				'property' => 'name',
-				'type' => 'text',
-				'label' => 'Name',
-				'maxLength' => 50,
-				'description' => 'A name for this indexing profile.',
-				'note' => 'This should match the source of an Account Profile.',
+				'type' => 'enum',
+				'label' => 'Account Profile',
+				'values' => $accountProfiles,
+				'description' => 'Select the unique Account Profile that will correspond to this Indexing Profile according to its set Record Source.',
 				'required' => true,
 				'readOnly' => $context != 'addNew',
 				'serverValidation' => 'validateName',

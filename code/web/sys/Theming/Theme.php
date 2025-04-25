@@ -546,6 +546,10 @@ class Theme extends DataObject {
 	public /** @noinspection PhpUnused */
 		$cookieConsentButtonBorderColorDefault;
 
+	/** @noinspection PhpUnused */
+	public static int $defaultPlacardImageMaxHeight = 0;
+	public int $placardImageMaxHeight;
+
 
 	private $_libraries;
 	private $_locations;
@@ -557,6 +561,7 @@ class Theme extends DataObject {
 			'browseCategoryImageSize',
 			'browseImageLayout',
 			'headerLogoAlignmentApp',
+			'placardImageMaxHeight',
 		];
 	}
 
@@ -734,7 +739,6 @@ class Theme extends DataObject {
 				'hideInLists' => true,
 				'default' => 'floating'
 			],
-
 			//Overall page colors
 			'pageBackgroundColor' => [
 				'property' => 'pageBackgroundColor',
@@ -2313,6 +2317,22 @@ class Theme extends DataObject {
 					],
 				]
 			],
+			'placardSection' => [
+				'property' => 'placardSection',
+				'type' => 'section',
+				'label' => 'Placards',
+				'hideInLists' => true,
+				'properties' => [
+					'placardImageMaxHeight' => [
+						'property' => 'placardImageMaxHeight',
+						'type' => 'integer',
+						'label' => 'Image Max Height (pixels)',
+						'description' => 'Maximum height for placard images (0 = no restriction).',
+						'default' => 0,
+						'hideInLists' => true,
+					],
+				],
+			],
 			'cookieConsentSection' => [
 				'property' => 'cookieConsentSection',
 				'type' => 'section',
@@ -2708,6 +2728,12 @@ class Theme extends DataObject {
 
 		$ret = parent::update();
 		if ($ret !== FALSE) {
+			$validationChangedTheme = $this->validateExtendsTheme();
+			// If validation changed the extendsTheme, save the object again.
+			if ($validationChangedTheme) {
+				parent::update();
+			}
+
 			// Update any themes that extend this theme to give them the correct name
 			if ($updateDerivedThemes) {
 				$childTheme = new Theme();
@@ -2867,6 +2893,7 @@ class Theme extends DataObject {
 		$this->getValueForPropertyUsingDefaults('cookieConsentButtonHoverTextColor', Theme::$defaultCookieConsentButtonHoverTextColor, $appliedThemes);
 		$this->getValueForPropertyUsingDefaults('cookieConsentButtonBorderColor', Theme::$defaultCookieConsentButtonBorderColor, $appliedThemes);
 		$this->getValueForPropertyUsingDefaults('headerLogoBackgroundColorApp', Theme::$defaultHeaderLogoBackgroundColorApp, $appliedThemes);
+		$this->getValueForPropertyUsingDefaults('placardImageMaxHeight', Theme::$defaultPlacardImageMaxHeight, $appliedThemes);
 	}
 
 	public function getValueForPropertyUsingDefaults($propertyName, $defaultValue, $appliedThemes) {
@@ -3013,6 +3040,7 @@ class Theme extends DataObject {
 		$interface->assign('customBodyFont', $this->customBodyFont);
 		$interface->assign('customBodyFontName', '');
 		$interface->assign('bodyFont', '');
+		$interface->assign('placardImageMaxHeight', $this->placardImageMaxHeight);
 		if ($this->customHeadingFont != null) {
 			$customHeadingFontName = substr($this->customHeadingFont, 0, strrpos($this->customHeadingFont, '.'));
 			$interface->assign('customHeadingFontName', $customHeadingFontName);
@@ -3373,5 +3401,52 @@ class Theme extends DataObject {
 		unset($this->customBodyFont);
 		unset($this->customHeadingFont);
 		unset($this->generatedCss);
+	}
+
+	/**
+	 * Validates the `extendsTheme` property to ensure it references a valid, non-self theme.
+	 *
+	 * - If `extendsTheme` is set but does not point to an existing theme, it resets the value and logs an error.
+	 * - If `extendsTheme` references the current theme itself, it removes the self-reference and logs the correction.
+	 *
+	 * @return bool Returns true if the `extendsTheme` value was invalid and had to be reset (non-existent or self-referential), false otherwise.
+	 */
+	private function validateExtendsTheme(): bool
+	{
+		if (!empty($this->extendsTheme)) {
+			$parentTheme = new Theme();
+			$parentTheme->themeName = $this->extendsTheme;
+			if (!$parentTheme->find(true)) {
+				$originalExtends = $this->extendsTheme;
+				$this->extendsTheme = '';
+				global $logger;
+				$logger->log("Theme {$this->themeName} was extending non-existent theme {$originalExtends}, reset to no parent.", Logger::LOG_NOTICE);
+				// No need to check for self-reference if the parent didn't exist.
+				return true;
+			}
+		}
+
+		if (!empty($this->extendsTheme) && $this->extendsTheme == $this->themeName) {
+			$this->extendsTheme = '';
+			global $logger;
+			$logger->log("Fixed self-referential theme: {$this->themeName} was extending itself.", Logger::LOG_NOTICE);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Modify the structure of the object based on the object currently being edited.
+	 * This can be used to change enums or other values based on the object being edited, so we know relationships.
+	 *
+	 * @param $structure
+	 * @return array
+	 */
+	public function updateStructureForEditingObject($structure) : array {
+		// Remove the current theme from the list of available themes to extend.
+		if (!empty($this->themeName) && isset($structure['extendsTheme']['values'][$this->themeName])) {
+			unset($structure['extendsTheme']['values'][$this->themeName]);
+		}
+		return $structure;
 	}
 }

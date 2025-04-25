@@ -4,6 +4,7 @@ require_once ROOT_DIR . '/Action.php';
 require_once ROOT_DIR . '/services/Admin/Admin.php';
 require_once ROOT_DIR . '/services/Admin/ObjectEditor.php';
 require_once ROOT_DIR . '/sys/Indexing/IndexingProfile.php';
+require_once ROOT_DIR . '/sys/Account/AccountProfile.php';
 
 class ILS_IndexingProfiles extends ObjectEditor {
 	function launch() : void {
@@ -70,6 +71,10 @@ class ILS_IndexingProfiles extends ObjectEditor {
 			}
 			parent::launch();
 		} else {
+			if (!AccountProfile::hasValidILSProfiles()) {
+				$warningMessage = translate(['text' => '<strong>Warning:</strong> No available Account Profiles found to associate with a new Indexing Profile. You must <a href="/Admin/AccountProfiles?objectAction=addNew">create a new Account Profile</a> first. Each Indexing Profile requires its own unique Account Profile.', 'isAdminFacing' => true]);
+				$interface->assign('propertiesListWarningMessage', $warningMessage);
+			}
 			parent::launch();
 		}
 	}
@@ -122,7 +127,7 @@ class ILS_IndexingProfiles extends ObjectEditor {
 	}
 
 	function canAddNew() : bool {
-		return true;
+		return AccountProfile::hasValidILSProfiles();
 	}
 
 	function canDelete() : bool {

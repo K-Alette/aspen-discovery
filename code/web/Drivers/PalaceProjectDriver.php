@@ -53,7 +53,17 @@ class PalaceProjectDriver extends AbstractEContentDriver {
 		}
 
 		$headers = $this->getPalaceProjectHeaders($patron);
-		$checkoutsUrl = $settings->apiUrl . "/" . $settings->libraryId . "/loans?refresh=false";
+		$homeLibrary = $patron->getHomeLibrary();
+		if (!empty($homeLibrary)) {
+			$homePalaceProjectLibraryId = $homeLibrary->palaceProjectLibraryId;
+			if (!empty($homePalaceProjectLibraryId)) {
+				$checkoutsUrl = $settings->apiUrl . "/" . $homePalaceProjectLibraryId . "/loans?refresh=false";
+			} else {
+				$checkoutsUrl = $settings->apiUrl . "/" . $settings->libraryId . "/loans?refresh=false";
+			}
+		} else {
+			$checkoutsUrl = $settings->apiUrl . "/" . $settings->libraryId . "/loans?refresh=false";
+		}
 
 		$this->initCurlWrapper();
 		$this->curlWrapper->addCustomHeaders($headers, true);
@@ -375,7 +385,18 @@ class PalaceProjectDriver extends AbstractEContentDriver {
 		$recordDriver = new PalaceProjectRecordDriver($recordId);
 		if ($recordDriver->isValid()) {
 			$borrowLink = $recordDriver->getBorrowLink();
-
+			$settings = $this->getActiveSettings();
+			$homeLibrary = $patron->getHomeLibrary();
+			if (!empty($homeLibrary)) {
+				$homePalaceProjectLibraryId = $homeLibrary->palaceProjectLibraryId;
+				if (!empty($homePalaceProjectLibraryId)) {
+					$borrowLink = preg_replace(
+						'~/[^/]+/works/~',
+					'/' . $homePalaceProjectLibraryId . '/works/',
+						$borrowLink
+					);
+				}
+			}
 			$headers = $this->getPalaceProjectHeaders($patron);
 			$this->initCurlWrapper();
 			$this->curlWrapper->addCustomHeaders($headers, true);
@@ -600,6 +621,18 @@ class PalaceProjectDriver extends AbstractEContentDriver {
 		$recordDriver = new PalaceProjectRecordDriver($titleId);
 		if ($recordDriver->isValid()) {
 			$borrowLink = $recordDriver->getBorrowLink();
+			$settings = $this->getActiveSettings();
+			$homeLibrary = $patron->getHomeLibrary();
+			if (!empty($homeLibrary)) {
+				$homePalaceProjectLibraryId = $homeLibrary->palaceProjectLibraryId;
+				if (!empty($homePalaceProjectLibraryId)) {
+					$borrowLink = preg_replace(
+						'~/[^/]+/works/~',
+					'/' . $homePalaceProjectLibraryId . '/works/',
+						$borrowLink
+					);
+				}
+			}
 
 			$headers = $this->getPalaceProjectHeaders($patron);
 			$this->initCurlWrapper();

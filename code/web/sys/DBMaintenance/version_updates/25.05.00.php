@@ -44,8 +44,23 @@ function getUpdates25_05_00(): array {
 		//kodi - Grove
 
 		//Yanjun Li - ByWater
+		'library_add_palace_project_library_id' => [
+			'title' => 'library_add_palace_project_library_id',
+			'description' => 'Add a field to store the palace project library id for the library',
+			'continueOnError' => false,
+			'sql' => [
+				"ALTER TABLE library add column palaceProjectLibraryId VARCHAR(50) DEFAULT NULL",
+			]
+		], //library_add_palace_project_library_id
 
 		// Leo Stoyanov - BWS
+		'add_placard_image_max_height_to_themes' => [
+			'title' => 'Add Placard Image Max Height to Themes',
+			'description' => 'Adds a placardImageMaxHeight column to the themes table to control placard image height.',
+			'sql' => [
+				"ALTER TABLE themes ADD COLUMN IF NOT EXISTS `placardImageMaxHeight` INT DEFAULT 0",
+			]
+		], //add_placard_image_max_height_to_themes
 		'custom_form_field_enums_to_text' => [
 			'title' => 'Increase Custom Form Field EnumValues Size',
 			'description' => 'Changes the enumValues column in web_builder_custom_form_field from VARCHAR(255) to TEXT to allow for longer select lists.',
@@ -78,12 +93,40 @@ function getUpdates25_05_00(): array {
 				'ALTER TABLE library ADD COLUMN allowSelectingCheckoutsToExport TINYINT(1) DEFAULT 0'
 			],
 		], //allow_selecting_checkouts_to_export
+		'add_ability_to_highlight_campaigns_in_account_area' => [
+			'title' => 'Add Ability to Highlight Campaigns In Account Area',
+			'description' => 'Allow libraries to choose whether to display a block highlighting campaigns on the account page',
+			'sql' => [
+				"ALTER TABLE library ADD COLUMN highlightCommunityEngagement TINYINT(1) DEFAULT 0",
+			],
+		], //add_ability_to_highlight_campaigns_in_account_area
+		'add_weight_to_campaign_milestones' => [
+			'title' => 'Add Weight To Campaign Milestones',
+			'description' => 'Add a weight column to campaign milestones to allow ordering',
+			'sql' => [
+				"ALTER TABLE ce_campaign_milestones ADD COLUMN weight int(11) NOT NULL DEFAULT 0",
+			],
+		], //add_weight_to_campaign_milestones
 
 		//chloe - PTFS-Europe
 
 		//James Staub - Nashville Public Library
 
 		//Lucas Montoya - Theke Solutions
+		'forceDebugLog' => [
+			'title' => 'Enable Forced Logging of Debugging Information for Paypal, PayPalPayflow, Propay, InvoiceCloud, Square, Stripe, and ACISpeedPay Payments',
+			'description' => 'Enable to show debugging information about Paypal payments',
+			'sql' => [
+				'ALTER TABLE paypal_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE square_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE stripe_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE propay_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE ncr_payments_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE paypal_payflow_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE aci_speedpay_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+				'ALTER TABLE invoice_cloud_settings ADD COLUMN forceDebugLog TINYINT(1) DEFAULT 0',
+			]
+		], //enable_payments_debugging
 
 		//other
 

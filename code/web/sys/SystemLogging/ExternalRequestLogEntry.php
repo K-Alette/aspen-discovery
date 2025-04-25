@@ -95,7 +95,7 @@ class ExternalRequestLogEntry extends DataObject {
 	 */
 	static function logRequest(string $requestType, string $method, string $url, $headers, string $body, string $responseCode, ?string $response, array $dataToSanitize) {
 		try {
-			if (IPAddress::showDebuggingInformation()) {
+			if (IPAddress::showDebuggingInformation() || self::getForceDebuggingLogStatus($requestType)) {
 				require_once ROOT_DIR . '/sys/SystemLogging/ExternalRequestLogEntry.php';
 				$externalRequest = new ExternalRequestLogEntry();
 				$externalRequest->requestType = $requestType;
@@ -122,6 +122,68 @@ class ExternalRequestLogEntry extends DataObject {
 			global $logger;
 			$logger->log("Error logging request " . $e->getMessage(), Logger::LOG_ERROR);
 		}
+	}
+
+	/**
+	 * Get the status of the toggle 'Force Debugging Log' for an object related with a request type.
+	 * Example : getForceDebuggingLogStatus should return the status for an specific vendor as it is related with the request type "fine_payment".
+	 *
+	 *
+	 * @return  bool     True if 'Force Debugging Log' is enabled for that object or False if not.
+	 * @access  private
+	 */
+	private static function getForceDebuggingLogStatus(string $requestType){
+
+		$status = false;
+
+		if(str_starts_with($requestType,"fine_payment")){
+			$status = self::getForcePaymentDebugLogging();
+		};
+
+		return $status;
+	}
+
+	/**
+	 * Get the status of the toggle 'Force Debugging Log' for a set ecommerce application.
+	 * 
+	 * @return  bool     True if 'Force Debugging Log' is enabled for that ecommerce or False if not.
+	 * @access  private
+	 */
+	private static function getForcePaymentDebugLogging(){
+
+		//Array of [finePaymentType, vendorId, vendorClass]
+		$eCommerceOptions = [
+			[2,'payPalSettingId','PayPalSetting'],
+			[5,'proPaySettingId','ProPaySetting'],
+			[8,'aciSpeedpaySettingId','ACISpeedpaySetting'],
+			[9,'invoiceCloudSettingId','InvoiceCloudSetting'],
+			[11,'paypalPayflowSettingId','PayPalPayflowSetting'],
+			[12,'squareSettingId','SquareSetting'],
+			[13,'stripeSettingId','StripeSetting'],
+			[14,'ncrSettingId','NCRPaymentsSetting']
+		];
+
+		global $library;
+		$settings = null;
+		$status = false;
+
+		//Look for the current vendor of the library and get
+		// the status of the 'forceDebugLog' attribute
+		foreach($eCommerceOptions as $eCommerceOption){
+
+			[$finePaymentType,$vendorId,$vendorClass] = $eCommerceOption;
+
+			if ($finePaymentType == $library->finePaymentType){
+				require_once ROOT_DIR . "/sys/ECommerce/$vendorClass.php";
+				$settings = new $vendorClass();
+				$settings->id = $library->$vendorId;
+				if($settings->find(true)){
+					$status = $settings->forceDebugLog ?? false;
+				}
+				break;
+			}
+		}
+		return $status;
 	}
 
 	private static function sanitize($field, $dataToSanitize) {

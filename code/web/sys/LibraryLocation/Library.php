@@ -67,6 +67,7 @@ class Library extends DataObject {
 	public $headerText;
 	public $footerText;
 	public $systemMessage;
+	public $highlightCommunityEngagement;
 
 	//Explore More Bar Display
 	public $displayExploreMoreBarInSummon;
@@ -173,6 +174,7 @@ class Library extends DataObject {
 		$hooplaScopeId;
 	public /** @noinspection PhpUnused */
 		$axis360ScopeId;
+	public $palaceProjectLibraryId;
 	public $palaceProjectScopeId;
 	public /** @noinspection PhpUnused */
 		$systemsToRepeatIn;
@@ -1068,6 +1070,15 @@ class Library extends DataObject {
 						'description' => 'Whether to display the language and display settings in the page header',
 						'hideInLists' => true,
 						'default' => true,
+						'permissions' => ['Library Theme Configuration'],
+					],
+					'highlightCommunityEngagement' => [
+						'property' => 'highlightCommunityEngagement',
+						'type' => 'checkbox',
+						'label' => 'Highlight Campaign in Account Page',
+						'description' => 'Whether or not to add a box highlighting campaigns to the top of the account page.',
+						'hideInLists' => true,
+						'default' => false,
 						'permissions' => ['Library Theme Configuration'],
 					],
 					'themes' => [
@@ -3926,6 +3937,14 @@ class Library extends DataObject {
 				'renderAsHeading' => true,
 				'permissions' => ['Library Records included in Catalog'],
 				'properties' => [
+					'palaceProjectLibraryId' => [
+						'property' => 'palaceProjectLibraryId',
+						'type' => 'text',
+						'label' => 'Palace Project Library ID',
+						'description' => 'The ID Number Palace Project uses for this library',
+						'hideInLists' => true,
+						'forcesReindex' => true,
+					],
 					'palaceProjectScopeId' => [
 						'property' => 'palaceProjectScopeId',
 						'type' => 'enum',

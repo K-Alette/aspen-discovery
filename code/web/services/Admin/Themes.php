@@ -213,5 +213,4 @@ class Admin_Themes extends ObjectEditor {
 		}
 		header("Location: /Admin/Themes?objectAction=edit&id=" . $themeId);
 	}
-
 }
