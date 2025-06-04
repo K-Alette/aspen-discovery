@@ -1300,6 +1300,10 @@ class Koha extends AbstractIlsDriver {
 			$user->phone = $userFromDb['phone'];
 			$user->_dateOfBirth = $userFromDb['dateofbirth'];
 
+			$date = date("Y-m-d");
+
+			$user->_expired = $userFromDb['dateexpiry'] < $date;
+
 
 			$user->_web_note = $userFromDb['opacnote'];
 

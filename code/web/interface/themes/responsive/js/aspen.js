@@ -10602,7 +10602,7 @@ AspenDiscovery.Admin = (function () {
 						var numVisibleActions = 0;
 						adminLinksInSection.each(function () {
 							var curMenuLink = $(this);
-							var title = curMenuLink.find(".adminLink").text();
+							var title = curMenuLink.find("a").text();
 							var titleMatches = searchRegex.test(title);
 							if (!titleMatches) {
 								curMenuLink.hide();
@@ -14594,13 +14594,13 @@ AspenDiscovery.MaterialsRequest = (function(){
 			//Don't bother checking if we don't have a format
 			var enoughDataToCheckForExistingRecord = false;
 			if (params.format !== '') {
-				if (params.isbn !== '') {
+				if (params.isbn && /[0-9X]/.test(params.isbn)) {
 					enoughDataToCheckForExistingRecord = true;
 				}
-				if (params.issn !== '') {
+				if (params.issn && /[0-9X]/.test(params.issn)) {
 					enoughDataToCheckForExistingRecord = true;
 				}
-				if (params.upc !== '') {
+				if (params.upc && /\d/.test(params.upc)) {
 					enoughDataToCheckForExistingRecord = true;
 				}
 				if (params.title !== '' && params.author !== undefined) {

@@ -179,8 +179,7 @@ function getUpdates25_06_00(): array {
 			'sql' => [
 				"ALTER TABLE user ADD COLUMN userPreferredName VARCHAR(256) NOT NULL",
 			]
-		],
-		//add_preferred_name
+		], //add_preferred_name
 		'add_preferred_name_option_to_dropdown' => [
 			'title' => 'Add Preferred Name Option To Dropdown',
 			'description' => 'Add the preferred name option to the name display dropdown in the library.',
@@ -188,8 +187,7 @@ function getUpdates25_06_00(): array {
 			'sql' => [
 				"ALTER TABLE library MODIFY COLUMN patronNameDisplayStyle ENUM('firstinitial_lastname','lastinitial_firstname','firstinitial_middleinitial_lastname','firstname_middleinitial_lastinitial', 'preferredname_lastinitial') DEFAULT 'firstinitial_lastname'",
 			]
-		],
-		//add_preferred_name_option_to_dropdown
+		], //add_preferred_name_option_to_dropdown
 		'allow_replacement_of_all_instances_of_first_name' => [
 			'title' => 'Allow Replacement Of All Instances Of First Name',
 			'description' => 'Allow replacement of all instances of first name with the patron\'s preferred name from the ILS id set',
@@ -197,8 +195,14 @@ function getUpdates25_06_00(): array {
 			'sql' => [
 				"ALTER TABLE library ADD COLUMN replaceAllFirstNameWithPreferredName TINYINT(1) DEFAULT 0",
 			]
-		],
-		//allow_replacement_of_all_instances_of_first_name
+		], //allow_replacement_of_all_instances_of_first_name
+		'add_admin_control_over_campaign_leaderboard' => [
+			'title' => 'Add Admin Control Over Campaign Leaderboard',
+			'description' => 'Add ability for admin to control whether leaderbaord displays',
+			'sql' => [
+				"ALTER TABLE library ADD COLUMN displayCampaignLeaderboard TINYINT(1) DEFAULT 0",
+			]
+		], //add_admin_control_over_campaign_leaderboard
 
 		//chloe - Open Fifth
 
