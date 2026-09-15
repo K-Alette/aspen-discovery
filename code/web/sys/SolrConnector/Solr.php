@@ -1195,6 +1195,35 @@ abstract class Solr {
 		}
 		$timer->logTime("build query in Solr");
 
+		if (!empty($options['q']) && is_string($options['q']) && (!isset($options['qt']) || $options['qt'] != 'dismax') && $index = "grouped_works_v3") {
+			$childDocFields = [
+				'available_at',
+				'availability_toggle',
+				'callnumber_sort',
+				'collection',
+				'detailed_location',
+				'econtent_source',
+				'format',
+				'format_category',
+				'local_callnumber',
+				'local_days_since_added',
+				'local_time_since_added',
+				'lib_boost',
+				'owning_library',
+				'owning_location',
+				'shelf_location',
+				'target_audience',
+				'target_audience_full'
+			];
+			foreach ($childDocFields as $childField) {
+				if (preg_match('/(^|[\s(])' . preg_quote($childField, '/') . ':/', $options['q'])) {
+					$options['pq'] = $options['q'];
+					$options['q'] = '{!parent which="recordtype:grouped_work" v=$pq}';
+					break;
+				}
+			}
+		}
+
 		// Limit Fields
 		if ($fields) {
 			$options['fl'] = $fields;
